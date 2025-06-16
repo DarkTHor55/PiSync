@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       allowNull: false,
     },
-    status: {
+    failed: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
