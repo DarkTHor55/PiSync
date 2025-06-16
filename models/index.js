@@ -8,7 +8,7 @@ db.sequelize = sequelize;
 
 // Load models
 db.User = require("./User")(sequelize, Sequelize.DataTypes);
-db.Device = require("./Devices")(sequelize, Sequelize.DataTypes);
+db.Device = require("./Device")(sequelize, Sequelize.DataTypes);
 db.SyncEvent = require("./SyncEvent")(sequelize, Sequelize.DataTypes);
 
 // Set associations

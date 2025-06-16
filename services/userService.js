@@ -1,22 +1,55 @@
 const { User } = require("../models");
+const {Exception} = require("../Exception/CustomException");
 
 exports.createUser = async (userData) => {
+
+  if (userData.email == null) {
+    throw new Exception("Email Not Found");
+  }
   const existingUser = await User.findOne({ where: { email: userData.email } });
-  if (existingUser) {
-    throw new Error("Email already exists");
+
+  if (existingUser != null) {
+    throw new Exception("User Already Exist");
   }
   const newUser = await User.create(userData);
   return newUser;
 };
 
-exports.getAllUsers = async () => {
-  return await User.findAll();
+
+
+exports.getAllUsers = async (page, limit) => {
+  
+
+  const offset = (page - 1) * limit;
+
+  const { count, rows } = await User.findAndCountAll({
+    limit,
+    offset,
+  });
+
+  return {
+    users: rows,
+    totalUsers: count,
+    currentPage: page,
+    totalPages: Math.ceil(count / limit),
+  };
 };
 
 exports.getUserById = async (id) => {
-  const user = await User.findByPk(id);
+ 
+  try {
+    const user = await User.findByPk(id);
+
   if (!user) {
-    throw new Error("User not found");
+      res.status(400).json({error:"User Not Found"});
+    }
+
+    return user;
+  } catch (error) {
+    if (error.name === "SequelizeDatabaseError") {
+      throw new Exception("Invalid user ID format", 400);
+    }
+
+    throw new Exception("Something went wrong while fetching user", 500);
   }
-  return user;
 };
