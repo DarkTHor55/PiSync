@@ -10,6 +10,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    password: {
+      type: DataTypes.STRING,
+      defaultValue: "password_digest",
+      allowNull: true  
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,

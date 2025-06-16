@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     timestamp: {
       type: DataTypes.DATE,
       allowNull: false,
+       defaultValue: DataTypes.NOW,
     },
     totalFileSynced: {
       type: DataTypes.INTEGER,
