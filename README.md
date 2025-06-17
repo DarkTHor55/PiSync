@@ -1,6 +1,6 @@
 # 🌐 PiSync Event Management Backend
 
-A robust and scalable backend API built with **Node.js**, **Express.js** and **postgresql** for managing users. It supports clean code architecture, pagination, error handling, and modular service layers.
+A robust and backend API built with **Node.js**, **Express.js** and **postgresql** for managing users. It supports clean code architecture, pagination, error handling, and modular service layers.
 
 
 ## 🚀 Getting Started
@@ -60,3 +60,4 @@ A robust and scalable backend API built with **Node.js**, **Express.js** and **p
 - Filters in APIs. e.g- Devices API could have a filter to get devices by userId or within a specific time range, etc.
 - Handling production grade data scale i.e. better data storage and retreival of sync events. Asynchronous processing of events.  - Unit tests
 - Better error handling.
+- 
