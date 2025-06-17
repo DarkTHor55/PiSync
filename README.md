@@ -1,4 +1,4 @@
-# 🌐 PiSync Event Management Backend API
+# 🌐 PiSync Event Management Backend
 
 A robust and scalable backend API built with **Node.js**, **Express.js** and **postgresql** for managing users. It supports clean code architecture, pagination, error handling, and modular service layers.
 
