@@ -10,29 +10,10 @@ exports.createDevice = async (req, res) => {
     }
 
     const newDevice = await deviceService.createDevice({ type, userId, deviceName });
-    res.status(201).json(newDevice);
+    res.status(201).json({ data: newDevice });
 
   } catch (error) {
-    if (
-      error.name === "SequelizeUniqueConstraintError" ||
-      error.message === "Device already exists"
-    ) {
-      return res.status(409).json({ error: "Device already exists for this user." });
-    }
-
-    if (
-      error.name === "SequelizeForeignKeyConstraintError" ||
-      error.message === "insert or update on table violates foreign key constraint"
-    ) {
-      return res.status(400).json({ error: "Invalid userId. User does not exist." });
-    }
-
-    if (error.name === "SequelizeValidationError") {
-      const messages = error.errors.map(err => err.message);
-      return res.status(400).json({ error: messages });
-    }
-
-    res.status(500).json({ error: "Failed to create device" });
+    res.status(error.statusCode).json({ errors: [error.message] });
   }
 };
 
@@ -46,11 +27,11 @@ exports.getAllDevices = async (req, res) => {
       return res.status(400).json({ error: "Page or limit is not defined properly." });
     }
     const result = await deviceService.getAllDevicesPaginated(page, limit);
-    res.status(200).json(result);
+    res.status(200).json({ data: result });
   } catch (error) {
     console.error("Get All Devices Error:", error);
 
-    res.status(error.statusCode || 500).json({
+    res.status(error.statusCode).json({
       error: error.message || "Failed to fetch devices",
     });
   }
@@ -67,8 +48,6 @@ exports.getDevicesWithFailures = async (req, res) => {
     });
   }
 };
-
-
 
 exports.getDeviceById = async (req, res) => {
   try {

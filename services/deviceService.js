@@ -55,15 +55,18 @@ exports.createDevice = async (deviceData) => {
 exports.getAllDevicesPaginated = async (page, limit) => {
   const offset = (page - 1) * limit;
 
-  const result = await Device.findAndCountAll({
-    include: [{ model: User, attributes: ["userId", "username", "email"], foreignKey: "userId" }],
-    limit,
-    offset,
-  });
-
-  return {
-    result,
-  };
+  try {
+    const result = await Device.findAndCountAll({
+      include: [{ model: User, attributes: ["userId", "username", "email"], foreignKey: "userId" }],
+      limit,
+      offset,
+    });
+    return result;
+  } catch (error) {
+    const err = new Error("Database error: " + error.message);
+    err.statusCode = 500;
+    throw err;
+  }
 };
 
 

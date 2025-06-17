@@ -1,5 +1,4 @@
 const { User } = require("../models");
-const { CustomException } = require("../Exception/CustomException");
 
 exports.createUser = async (userData) => {
 

@@ -98,10 +98,6 @@ module.exports = (sequelize, DataTypes) => {
         {
           name: "idx_deviceId",
           fields: ["deviceId"],
-        },
-        {
-          name: "idx_deviceId_createdAt",
-          fields: ["deviceId", "createdAt"],
         }
       ],
 
