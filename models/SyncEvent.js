@@ -87,10 +87,25 @@ module.exports = (sequelize, DataTypes) => {
         isDate: { msg: "UpdatedAt must be a valid date" },
       },
     },
-  }, {
-    tableName: "sync_events",
-    timestamps: false,
-  });
+  },
+
+
+
+    {
+      tableName: "sync_events",
+      timestamps: false,
+      indexes: [
+        {
+          name: "idx_deviceId",
+          fields: ["deviceId"],
+        },
+        {
+          name: "idx_deviceId_createdAt",
+          fields: ["deviceId", "createdAt"],
+        }
+      ],
+
+    });
 
   SyncEvent.associate = (models) => {
     SyncEvent.belongsTo(models.Device, { foreignKey: "deviceId" });

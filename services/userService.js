@@ -1,15 +1,15 @@
 const { User } = require("../models");
-const {Exception} = require("../Exception/CustomException");
+const { CustomException } = require("../Exception/CustomException");
 
 exports.createUser = async (userData) => {
 
   if (userData.email == null) {
-    throw new Exception("Email Not Found");
+    throw new CustomException("Email Not Found");
   }
   const existingUser = await User.findOne({ where: { email: userData.email } });
 
   if (existingUser != null) {
-    throw new Exception("User Already Exist");
+    throw new CustomException("User Already Exist");
   }
   const newUser = await User.create(userData);
   return newUser;
@@ -18,7 +18,7 @@ exports.createUser = async (userData) => {
 
 
 exports.getAllUsers = async (page, limit) => {
-  
+
 
   const offset = (page - 1) * limit;
 
@@ -36,12 +36,12 @@ exports.getAllUsers = async (page, limit) => {
 };
 
 exports.getUserById = async (id) => {
- 
+
   try {
     const user = await User.findByPk(id);
 
-  if (!user) {
-      res.status(400).json({error:"User Not Found"});
+    if (!user) {
+      res.status(400).json({ error: "User Not Found" });
     }
 
     return user;

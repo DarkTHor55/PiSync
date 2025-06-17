@@ -2,6 +2,7 @@ const { SyncEvent, Device, User } = require("../models");
 const NotificationService = require("./NotificationService");
 const { Op } = require("sequelize");
 
+
 exports.createSyncEvent = async (data) => {
   try {
     const { deviceId, totalFileSynced, totalError, internetSpeed } = data;
@@ -23,6 +24,12 @@ exports.createSyncEvent = async (data) => {
 
     const device = await Device.findByPk(deviceId, { include: [User] });
 
+    if (!device) {
+      const err = new Error("Device not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
     if (syncEvent) {
       syncEvent.totalFileSynced = totalFileSynced;
       syncEvent.totalError = totalError;
@@ -40,12 +47,22 @@ exports.createSyncEvent = async (data) => {
       });
     }
 
-    if (device && totalError > 0) {
+    if (totalError > 0) {
       device.FailedCount += 1;
-      await device.save();
+      device.consecutiveFailures += 1;
+
+      if (device.consecutiveFailures >= 3) {
+
+        NotificationService.notifyRepeatedFailure(deviceId, device.consecutiveFailures);
+      }
+    } else {
+      device.consecutiveFailures = 0;
     }
 
+    await device.save();
+
     return syncEvent;
+
 
   } catch (error) {
     if (error.name === "SequelizeValidationError") {
@@ -61,7 +78,8 @@ exports.createSyncEvent = async (data) => {
   }
 };
 
-exports.getSyncHistory = async (deviceId, page, limit ) => {
+
+exports.getSyncHistory = async (deviceId, page, limit) => {
   try {
     if (!deviceId) {
       const err = new Error("Device ID is required.");

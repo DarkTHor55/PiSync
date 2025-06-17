@@ -1,4 +1,3 @@
-const { CustomException } = require("../Exception/CustomException");
 const userService = require("../services/userService");
 
 exports.createUser = async (req, res) => {
@@ -60,9 +59,6 @@ exports.getUserById = async (req, res) => {
   } catch (error) {
     console.error("Get User By ID Error:", error.name, error.message);
 
-    if (error instanceof CustomException) {
-      return res.status(error.statusCode).json({ error: error.message });
-    }
 
     if (error.name === "SequelizeDatabaseError") {
       return res.status(400).json({ error: "Invalid user ID format" });

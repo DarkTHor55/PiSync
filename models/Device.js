@@ -54,6 +54,17 @@ module.exports = (sequelize, DataTypes) => {
                     msg: "FailedCount cannot be negative"
                 }
             }
+        }, consecutiveFailures: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
+            allowNull: false,
+            validate: {
+                isInt: { msg: "consecutiveFailures must be an integer" },
+                min: {
+                    args: [0],
+                    msg: "consecutiveFailures cannot be negative"
+                }
+            }
         }
     }, {
         tableName: "devices",
