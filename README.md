@@ -60,4 +60,4 @@ A robust and backend API built with **Node.js**, **Express.js** and **postgresql
 - Filters in APIs. e.g- Devices API could have a filter to get devices by userId or within a specific time range, etc.
 - Handling production grade data scale i.e. better data storage and retreival of sync events. Asynchronous processing of events.  - Unit tests
 - Better error handling.
-- 
+- Dockerization 
