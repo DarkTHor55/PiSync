@@ -6,30 +6,36 @@ exports.createUser = async (req, res) => {
     const { username, email, dob, password } = req.body;
     const newUser = await userService.createUser({ username, email, dob, password });
     const userResponse = userDTO(newUser);
-    return res.status(201).json({ users: userResponse });
+    return res.status(201).json({ data: userResponse });
 
   } catch (error) {
     let statusCode = 500;
     let errors = [];
 
-    if (error.name === "SequelizeValidationError") {
-      errors = error.errors.map(e => e.message);
-      statusCode = 400;
-    } else if (error.name === "SequelizeUniqueConstraintError") {
-      errors = ["Email already in use"];
-      statusCode = 409;
-    } else if (error.name === "SequelizeConnectionRefusedError") {
-      errors = ["Database connection failed"];
-      statusCode = 503;
-    } else {
-      errors = [error.message || "Unknown error"];
+    switch (error.name) {
+      case "SequelizeValidationError":
+        errors = error.errors.map(e => e.message);
+        statusCode = 400;
+        break;
+
+      case "SequelizeUniqueConstraintError":
+        errors = ["Email already in use"];
+        statusCode = 409;
+        break;
+
+      case "SequelizeConnectionRefusedError":
+        errors = ["Database connection failed"];
+        statusCode = 503;
+        break;
+
+      default:
+        errors = [error.message || "Unknown error"];
+        break;
     }
 
     return res.status(statusCode).json({ errors });
   }
 };
-
-
 exports.getAllUsers = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -42,40 +48,45 @@ exports.getAllUsers = async (req, res) => {
     }
 
     const result = await userService.getAllUsers(page, limit);
-    res.status(200).json(result);
+    return res.status(200).json({ data: result });
 
   } catch (error) {
     console.error("Get All Users Error:", error.name, error.message);
 
-    if (error.name === "SequelizeConnectionError") {
-      return res.status(503).json({
-        errors: ["Database connection failed"]
-      });
-    }
+    const errors = [error.name === "SequelizeConnectionError"
+      ? "Database connection failed"
+      : error.message || "Failed to retrieve users"
+    ];
 
-    res.status(500).json({
-      errors: ["Failed to retrieve users"]
-    });
+    return res.status(500).json({ errors });
   }
 };
-
-
 exports.getUserById = async (req, res) => {
   try {
     const userId = req.params.id;
     if (!userId) {
-      res.status(400).json({ error: "Invalid or missing user ID" });
+      return res.status(400).json({ errors: ["Invalid or missing user ID"] });
     }
+
     const user = await userService.getUserById(userId);
-    res.status(200).json(user);
+    return res.status(200).json({ data: user });
 
   } catch (error) {
     console.error("Get User By ID Error:", error.name, error.message);
 
+    let statusCode = 500;
+    let errors = [];
 
     if (error.name === "SequelizeDatabaseError") {
-      return res.status(400).json({ error: "Invalid user ID format" });
+      errors = ["Invalid user ID format"];
+      statusCode = 400;
+    } else if (error.message === "User not found") {
+      errors = [error.message];
+      statusCode = 404;
+    } else {
+      errors = [error.message || "Failed to retrieve user"];
     }
-    res.status(500).json({ error: "Failed to retrieve user" });
+
+    return res.status(statusCode).json({ errors });
   }
 };

@@ -1,54 +1,91 @@
 const { User } = require("../models");
+const { ValidationError, DatabaseError } = require("sequelize");
 
 exports.createUser = async (userData) => {
+  try {
+    if (!userData.email) {
+      const err = new Error("Email is required.");
+      err.statusCode = 400;
+      throw err;
+    }
 
-  if (userData.email == null) {
-    throw new CustomException("Email Not Found");
-  }
-  const existingUser = await User.findOne({ where: { email: userData.email } });
+    const existingUser = await User.findOne({ where: { email: userData.email } });
 
-  if (existingUser != null) {
-    throw new CustomException("User Already Exist");
+    if (existingUser) {
+      const err = new Error("User already exists with this email.");
+      err.statusCode = 409;
+      throw err;
+    }
+
+    const newUser = await User.create(userData);
+    return newUser;
+
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      const messages = error.errors.map(e => e.message);
+      const err = new Error(messages.join(", "));
+      err.statusCode = 400;
+      throw err;
+    }
+
+    if (error instanceof DatabaseError) {
+      const err = new Error("Database error: " + error.message);
+      err.statusCode = 500;
+      throw err;
+    }
+
+    if (error.statusCode === 409 || error.statusCode === 400) {
+      throw error;
+    }
+
+    const err = new Error("Failed to create user.");
+    err.statusCode = 500;
+    throw err;
   }
-  const newUser = await User.create(userData);
-  return newUser;
 };
-
-
-
 exports.getAllUsers = async (page, limit) => {
-
-
   const offset = (page - 1) * limit;
 
-  const { count, rows } = await User.findAndCountAll({
-    limit,
-    offset,
-  });
+  try {
+    const { count, rows } = await User.findAndCountAll({
+      limit,
+      offset,
+    });
 
-  return {
-    users: rows,
-    totalUsers: count,
-    currentPage: page,
-    totalPages: Math.ceil(count / limit),
-  };
+    return {
+      users: rows,
+      totalUsers: count,
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+    };
+
+  } catch (error) {
+    const err = new Error("Database error: " + error.message);
+    err.statusCode = 500;
+    throw err;
+  }
 };
-
 exports.getUserById = async (id) => {
-
   try {
     const user = await User.findByPk(id);
 
     if (!user) {
-      res.status(400).json({ error: "User Not Found" });
+      const err = new Error("User not found.");
+      err.statusCode = 404;
+      throw err;
     }
 
     return user;
+
   } catch (error) {
-    if (error.name === "SequelizeDatabaseError") {
-      throw new Exception("Invalid user ID format", 400);
+    if (error instanceof DatabaseError) {
+      const err = new Error("Invalid user ID format.");
+      err.statusCode = 400;
+      throw err;
     }
 
-    throw new Exception("Something went wrong while fetching user", 500);
+    const err = new Error("Something went wrong while fetching the user.");
+    err.statusCode = 500;
+    throw err;
   }
 };
